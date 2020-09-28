@@ -1,0 +1,11 @@
+# Creating a basic server
+- create a socket
+- check if the socket creation was successful
+- set members of sockaddr_in to store the address and port
+	- use htons to convert port number from little-endian to big-endian(host byte order to network byte order) 
+	- use inet_aton to convert address from little-endian "numbers and dots" format to numeric binary big-endian(host byte order to network byte order) 
+- bind the socket to the server address and port
+	- check errors
+- listen to connections
+	- accept connections in an infinite loop
+	- receive bytes (recv)
