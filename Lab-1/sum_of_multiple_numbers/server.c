@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <stdbool.h>
 #ifndef WIN32
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -10,11 +10,10 @@
 #include <errno.h>
 #include <string.h>
 #include <arpa/inet.h>
-#include <stdbool.h>
 #include <signal.h>
 #else
 #include <WinSock2.h>
-#include <cstdint>
+#include <stdint.h>
 #endif
 
 int main() {
@@ -31,7 +30,7 @@ int main() {
 	int socket_descriptor;
 	socket_str.sin_family = AF_INET;
 	socket_str.sin_port = htons(6092);
-	inet_aton(INADDR_ANY, &socket_str.sin_addr);
+	socket_str.sin_addr.s_addr = INADDR_ANY;
 
 	socket_descriptor = socket(AF_INET, SOCK_STREAM, 0);	
 	if (socket_descriptor == -1) {
@@ -67,9 +66,7 @@ int main() {
 		
 		printf("Incoming client from %s:%d\n", inet_ntoa(client.sin_addr), ntohs(client.sin_port));
 		while (number != 0) {
-			printf("%d\n", number);
-			printf("!!!In the 2nd while loop...\n");
-			int result = recv(client_connection, &number, sizeof(number), 0);	
+			int result = recv(client_connection, (char*)&number, sizeof(number), 0);	
 
 			if (result != sizeof(number)) {
 				printf("Could not receive the number\n");
@@ -77,11 +74,10 @@ int main() {
 			}
 			
 			//number = ntohs(number);
-			printf("element=%d\n", number);
 			sum += number;
 		}
 		
-		int result = send(client_connection, &sum, sizeof(sum), 0);
+		int result = send(client_connection, (char*)&sum, sizeof(sum), 0);
 		if (result < 0) {
 			printf("Error sending the result...\n");
 			continue;
