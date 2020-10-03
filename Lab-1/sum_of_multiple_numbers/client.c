@@ -31,10 +31,6 @@ int main() {
 	printf("Each number is entered at once.\n");
 	printf("To end the sequence of numbers, enter 0.\n");
 
-	int array_size = 4;
-	int number_of_elements = 0;
-	int* array_of_numbers = malloc(sizeof(int)*array_size);
-
 	while (true) {
 		int number;
 		printf(">>>");
