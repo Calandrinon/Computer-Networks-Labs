@@ -1,4 +1,6 @@
 #include <stdio.h>
+
+#ifndef WIN32
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdlib.h>
@@ -10,15 +12,26 @@
 #include <arpa/inet.h>
 #include <stdbool.h>
 #include <signal.h>
+#else
+#include <WinSock2.h>
+#include <cstdint>
+#endif
 
 int main() {
 	//signal();
+	#ifdef WIN32
+       WSADATA wsaData;
+       if (WSAStartup(MAKEWORD(2, 2), &wsaData) < 0) {
+              printf("Error initializing the Windows Sockets LIbrary");
+              return -1;
+       }
+	#endif
 
 	struct sockaddr_in socket_str;
 	int socket_descriptor;
 	socket_str.sin_family = AF_INET;
 	socket_str.sin_port = htons(6092);
-	inet_aton("127.0.0.1", &socket_str.sin_addr);
+	inet_aton(INADDR_ANY, &socket_str.sin_addr);
 
 	socket_descriptor = socket(AF_INET, SOCK_STREAM, 0);	
 	if (socket_descriptor == -1) {
@@ -43,6 +56,9 @@ int main() {
 		int client_connection = accept(socket_descriptor, (struct sockaddr*)&client, &sizeof_client);
 		int number = 1, array_size = 4, number_of_elements = 0, sum = 0;
 		int err = errno;	
+		#ifdef WIN32
+        	err = WSAGetLastError();
+		#endif
 		
 		if (client_connection < 0) {
 			printf("Client connection failed! %d\n", err);
@@ -70,9 +86,16 @@ int main() {
 			printf("Error sending the result...\n");
 			continue;
 		}
-		
-		close(client_connection);
+		#ifdef WIN32	
+			closesocket(client_connection);
+		#else
+			close(client_connection);
+		#endif
 	}
+
+	#ifdef WIN32
+       WSACleanup();
+	#endif
 
 	return 0;
 }
