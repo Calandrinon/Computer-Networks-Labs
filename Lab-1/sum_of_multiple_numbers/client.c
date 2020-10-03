@@ -14,7 +14,7 @@ int main() {
 	struct sockaddr_in socket_str;
 	socket_str.sin_family = AF_INET;
 	socket_str.sin_port = htons(6092);
-	inet_aton("127.0.0.1", &socket_str.sin_addr);
+	inet_aton("192.168.1.13", &socket_str.sin_addr);
 	
 	int socket_descriptor = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_descriptor < 0) {
