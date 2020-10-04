@@ -16,8 +16,35 @@
 #endif
 
 #define BUF_LEN 1024
-int main() {
 
+int count_spaces(char text[]) {
+    int number_of_spaces = 0;
+    for (int i = 0; i < strlen(text); i++) {
+        if (text[i] == ' ') {
+            number_of_spaces++;
+        }
+    }
+
+    return number_of_spaces;
+}
+
+char* convert_int_to_string(int number) {
+    char* converted_int = malloc(BUF_LEN);
+    int number_of_digits = 1, number_copy = number;
+    while (number_copy >= 10) {
+        number_of_digits++;
+        number_copy /= 10;
+    }
+
+    for (int i = number_of_digits - 1; i >= 0; i--) {
+        converted_int[i] = (number % 10) + '0'; 
+        number /= 10;
+    }
+
+    return converted_int;
+}
+
+int main() {
     #ifdef WIN32
         WSADATA wsaData;
         if (WSAStartup(MAKEWORD(2, 2), &wsaData) < 0) {
@@ -62,10 +89,12 @@ int main() {
 
         char message[BUF_LEN];
         recv(client_connection, message, BUF_LEN, 0);
+        int number_of_spaces = count_spaces(message);
         printf("%s\n", message);
-        strcpy(message, "Hello, stranger!");
-        send(client_connection, message, BUF_LEN, 0);
-
+        printf("Number of spaces: %d\n", number_of_spaces);
+        char* response = convert_int_to_string(number_of_spaces);
+        send(client_connection, response, BUF_LEN, 0);
+        free(response);
         #ifdef WIN32
             closesocket(client_connection);
         #else
