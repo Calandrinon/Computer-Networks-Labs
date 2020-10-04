@@ -41,6 +41,8 @@ char* convert_int_to_string(int number) {
         number /= 10;
     }
 
+    converted_int[number_of_digits] = '\0';
+
     return converted_int;
 }
 
