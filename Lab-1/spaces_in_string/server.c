@@ -61,6 +61,8 @@ int main() {
         printf("Connected with a client.\n");
 
         char message[BUF_LEN];
+        recv(client_connection, message, BUF_LEN, 0);
+        printf("%s\n", message);
         strcpy(message, "Hello, stranger!");
         send(client_connection, message, BUF_LEN, 0);
 

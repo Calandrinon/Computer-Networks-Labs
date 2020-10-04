@@ -30,6 +30,8 @@ int main() {
 
 	/// This is currently just a test to see if sending and receiving a string over a network works.	
 	char message[BUF_LEN];
+	fgets(message, BUF_LEN, stdin);
+	send(socket_fd, message, BUF_LEN, 0);
 	recv(socket_fd, message, BUF_LEN, 0);	
 	printf("%s\n", message);
 	close(socket_fd);
