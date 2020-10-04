@@ -30,6 +30,7 @@ int main() {
 
 	/// This is currently just a test to see if sending and receiving a string over a network works.	
 	char message[BUF_LEN];
+	printf("Write a message to the server and get the number of spaces that it contains: ");
 	fgets(message, BUF_LEN, stdin);
 	send(socket_fd, message, BUF_LEN, 0);
 	recv(socket_fd, message, BUF_LEN, 0);	
