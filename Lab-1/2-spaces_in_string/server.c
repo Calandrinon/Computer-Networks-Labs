@@ -14,11 +14,10 @@
 #include <WinSock2.h>
 #include <stdint.h>
 #endif
-
 #define BUF_LEN 1024
 
-int count_spaces(char text[]) {
-    int number_of_spaces = 0;
+uint32_t count_spaces(char text[]) {
+    uint32_t number_of_spaces = 0;
     for (int i = 0; i < strlen(text); i++) {
         if (text[i] == ' ') {
             number_of_spaces++;
@@ -26,24 +25,6 @@ int count_spaces(char text[]) {
     }
 
     return number_of_spaces;
-}
-
-char* convert_int_to_string(int number) {
-    char* converted_int = malloc(BUF_LEN);
-    int number_of_digits = 1, number_copy = number;
-    while (number_copy >= 10) {
-        number_of_digits++;
-        number_copy /= 10;
-    }
-
-    for (int i = number_of_digits - 1; i >= 0; i--) {
-        converted_int[i] = (number % 10) + '0'; 
-        number /= 10;
-    }
-
-    converted_int[number_of_digits] = '\0';
-
-    return converted_int;
 }
 
 int main() {
@@ -91,12 +72,11 @@ int main() {
 
         char message[BUF_LEN];
         recv(client_connection, message, BUF_LEN, 0);
-        int number_of_spaces = count_spaces(message);
+        uint32_t number_of_spaces = count_spaces(message);
         printf("%s\n", message);
         printf("Number of spaces: %d\n", number_of_spaces);
-        char* response = convert_int_to_string(number_of_spaces);
-        send(client_connection, response, BUF_LEN, 0);
-        free(response);
+        number_of_spaces = htonl(number_of_spaces);
+        send(client_connection, (uint32_t*)&number_of_spaces, sizeof(number_of_spaces), 0);
         #ifdef WIN32
             closesocket(client_connection);
         #else

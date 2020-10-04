@@ -28,13 +28,16 @@ int main() {
 		return 0;
 	}
 
-	/// This is currently just a test to see if sending and receiving a string over a network works.	
 	char message[BUF_LEN];
 	printf("Write a message to the server and get the number of spaces that it contains: ");
 	fgets(message, BUF_LEN, stdin);
 	send(socket_fd, message, BUF_LEN, 0);
-	recv(socket_fd, message, BUF_LEN, 0);	
-	printf("Number of spaces in your message: %s\n", message);
+
+	uint32_t number_of_spaces;
+	recv(socket_fd, (uint32_t*)&number_of_spaces, BUF_LEN, 0);	
+	number_of_spaces = ntohl(number_of_spaces);
+
+	printf("Number of spaces in your message: %d\n", number_of_spaces);
 	close(socket_fd);
 	return 0;
 }
