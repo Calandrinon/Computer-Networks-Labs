@@ -20,6 +20,7 @@ char* reverse_string(char string[]) {
         reversed_string[strlen(string) - i - 1] = string[i]; 
     }
 
+    reversed_string[strlen(string)] = '\0';
     return reversed_string;
 }
 
@@ -64,9 +65,9 @@ int main() {
         if (client_connection < 0) {
             printf("Could not connect with the client.\n");
             continue;
-        }
-
-        printf("Client %s:%d connected.\n", client_address.sin_addr, client_address.sin_port);
+     	} 
+	    
+	printf("Client %s:%d connected.\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
 
         char message[BUF_SIZE];
         recv(client_connection, message, BUF_SIZE, 0);
