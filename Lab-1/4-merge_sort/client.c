@@ -15,7 +15,7 @@ int main() {
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(9999);
-    server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_address.sin_addr.s_addr = inet_addr("192.168.1.11");
 
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -37,8 +37,8 @@ int main() {
     send(socket_fd, first_message, BUF_LEN, 0);
     send(socket_fd, second_message, BUF_LEN, 0);
 
-    char response[BUF_LEN];
-    recv(socket_fd, response, BUF_LEN, 0);
+    char response[BUF_LEN*2];
+    recv(socket_fd, response, BUF_LEN*2, 0);
     printf("The two strings, merged and sorted: %s\n", response);
     return 0;
 }

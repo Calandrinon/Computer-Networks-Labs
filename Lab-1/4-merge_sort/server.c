@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #ifndef WIN32
 #include <sys/socket.h>
@@ -13,6 +14,50 @@
 #include <WinSock2.h>
 #endif
 #define BUF_LEN 1024
+
+void merge(char string[], int l, int m, int r) {
+    int p, q;
+    p = m - l + 1;
+    q = r - m;
+    char L[p], R[q];
+    for (int i = 0; i < p; i++)
+        L[i] = string[l + i];
+    for (int i = 0; i < q; i++)
+        R[i] = string[m + i + 1];
+
+    int i = 0, j = 0, k = l;
+    while (i < p && j < q) {
+        if (L[i] <= R[j]) {
+            string[k] = L[i];
+            i++;
+        } else {
+            string[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < p) {
+        string[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < q) {
+        string[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+void merge_sort(char string[], int l, int r) {
+    if (l < r) {
+        int m = (l + r) / 2;
+        merge_sort(string, l, m);
+        merge_sort(string, m+1, r);
+        merge(string, l, m, r);
+    }
+}
 
 int main() {
     #ifdef WIN32
@@ -66,6 +111,21 @@ int main() {
 
         printf("First message: %s\n", first_message);
         printf("Second message: %s\n", second_message);
+
+        char result_message[BUF_LEN*2];
+        int result_index = 0;
+        for (int index = 0; index < strlen(first_message); index++) {
+            result_message[result_index] = first_message[index];
+            result_index++;
+        }
+        for (int index = 0; index < strlen(second_message); index++) {
+            result_message[result_index] = second_message[index];
+            result_index++;
+        }
+        result_message[result_index] = '\0';
+        merge_sort(result_message, 0, strlen(first_message)+strlen(second_message)-1);
+        printf("%s\n", result_message);
+        send(client_connection, result_message, BUF_LEN*2, 0);
 
         #ifdef WIN32
         closesocket(client_connection);
