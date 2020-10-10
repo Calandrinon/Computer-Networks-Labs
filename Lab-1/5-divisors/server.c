@@ -95,13 +95,21 @@ int main() {
             continue;
         }
 
-        int32_t number;
+        int32_t number, number_of_divisors;
         recv(client_connection, &number, sizeof(number), 0);
         number = ntohl(number);
         DivisorArray* divisors = get_divisors_as_string(number);
         int divisors_index = 0;
+
+        number_of_divisors = htonl(divisors->size);
+        //sends the number of divisors
+        send(client_connection, &number_of_divisors, sizeof(number_of_divisors), 0);
+
         for (divisors_index; divisors_index < divisors->size; divisors_index++) {
             printf("%d\n", divisors->divisors[divisors_index]); 
+            int32_t number_to_send = divisors->divisors[divisors_index]; 
+            number_to_send = htonl(number_to_send);
+            send(client_connection, &number_to_send, sizeof(int32_t), 0);
         }
 
         free(divisors);
