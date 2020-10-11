@@ -17,6 +17,14 @@
 #define STR_LEN 1024
 
 int main() {
+	#ifdef WIN32
+	WSADATA wsaData;
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) < 0) {
+		printf("WinSock API failed to initialize.\n");	
+		return 0;
+	}
+	#endif
+
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(9999);
