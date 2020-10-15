@@ -6,18 +6,22 @@ import socket, struct
        the command and returns the standard output and the exit code to the client.
 """
 
-try:
-    socket_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-except Exception as e:
-    print("Error creating socket: {}".format(e))
+while True:
+    try:
+        socket_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    except Exception as e:
+        print("Error creating socket: {}".format(e))
 
-socket_fd.connect(("192.168.1.9", 9999))
+    socket_fd.connect(("192.168.1.9", 9999))
 
-command = input("Enter a command:")
-socket_fd.send(command.encode())
+    command = input("Enter a command:")
+    if command == "exit":
+        socket_fd.close()
+        break
+    socket_fd.send(command.encode())
 
-response_size = socket_fd.recv(4)
-response_size = struct.unpack('!I', response_size)[0]
-print("response size: {}".format(response_size))
-result = socket_fd.recv(response_size).decode()
-print("Result:\n\n", result)
+    response_size = socket_fd.recv(4)
+    response_size = struct.unpack('!I', response_size)[0]
+    print("response size: {}".format(response_size))
+    result = socket_fd.recv(response_size).decode()
+    print("Result:\n\n", result)
