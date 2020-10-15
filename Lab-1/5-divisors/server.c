@@ -29,7 +29,7 @@ typedef struct {
     int32_t size;
 } DivisorArray;
 
-DivisorArray* get_divisors_as_string(int32_t number) {
+DivisorArray* get_divisors(int32_t number) {
     DivisorArray* divisors = malloc(sizeof(DivisorArray));
     divisors->size = 0;
 
@@ -98,7 +98,7 @@ int main() {
         int32_t number, number_of_divisors;
         recv(client_connection, &number, sizeof(number), 0);
         number = ntohl(number);
-        DivisorArray* divisors = get_divisors_as_string(number);
+        DivisorArray* divisors = get_divisors(number);
         int divisors_index = 0;
 
         number_of_divisors = htonl(divisors->size);
