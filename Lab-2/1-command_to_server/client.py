@@ -11,7 +11,7 @@ try:
 except Exception as e:
     print("Error creating socket: {}".format(e))
 
-socket_fd.connect(("127.0.0.1", 9999))
+socket_fd.connect(("192.168.1.9", 9999))
 
 command = input("Enter a command:")
 socket_fd.send(command.encode())
