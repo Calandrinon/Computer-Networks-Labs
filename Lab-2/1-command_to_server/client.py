@@ -1,5 +1,4 @@
 import socket, struct
-BUFFER_SIZE = 8192
 
 """
     1. The client takes a string from the command line and sends it to the server.

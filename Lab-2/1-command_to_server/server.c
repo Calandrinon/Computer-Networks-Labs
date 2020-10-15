@@ -14,6 +14,7 @@
 #define BUFFER_SIZE 8192
 
 int main() {
+    signal(SIGCHLD, SIG_IGN);
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(9999);
