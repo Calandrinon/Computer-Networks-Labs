@@ -14,7 +14,7 @@ while True:
 
     socket_fd.connect(("192.168.1.9", 9999))
 
-    command = input("Enter a command:")
+    command = input("$ ")
     if command == "exit":
         socket_fd.close()
         break
@@ -22,6 +22,5 @@ while True:
 
     response_size = socket_fd.recv(4)
     response_size = struct.unpack('!I', response_size)[0]
-    print("response size: {}".format(response_size))
     result = socket_fd.recv(response_size).decode()
-    print("Result:\n\n", result)
+    print("{}\n".format(result))

@@ -50,7 +50,6 @@ int main() {
 
         char command[COMMAND_LENGTH];
         if (fork() == 0) {
-            printf("In child\n");
             recv(client_socket, command, COMMAND_LENGTH, 0);
             char command_name[20];
             char delimiter[] = " ";
@@ -70,11 +69,13 @@ int main() {
             }
 
             int p[2];
-            int stdout_fd = dup(1);
             pipe(p);
-            if (fork() == 0) {
+
+            int pid = fork();
+            if (pid == 0) {
                 close(p[0]);
                 dup2(p[1], 1);
+                dup2(p[1], 2);
                 execvp(command_name, arguments);
             }
 
@@ -86,7 +87,6 @@ int main() {
                 current_char++;
                 read(p[0], current_char, 1);
             } while (*current_char != '\0');
-            *current_char = '\0';
 
             close(p[0]);
             printf("Result:\n%s\n", buffer);
