@@ -36,7 +36,7 @@ def main():
         sys.exit()
 
     try:
-        socket_fd.bind(("127.0.0.1", 1234))
+        socket_fd.bind(("0.0.0.0", 1234))
     except Exception as e:
         print("Binding failed: {}".format(e))
         sys.exit()
