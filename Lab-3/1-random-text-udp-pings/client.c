@@ -50,36 +50,46 @@ int main(int argc, char* argv[]) {
     }
 
     char buffer[BUF_LEN], server_response[BUF_LEN];
-    memset(buffer, 0, BUF_LEN);
-    generate_message(buffer);
-    int message_length = strlen(buffer);
+    int request_number = 0;
+    while (true) {
+        sleep(2);
+        request_number++;
+        printf("Request no. %d:\n", request_number);
+        memset(buffer, 0, BUF_LEN);
+        generate_message(buffer);
 
-    printf("The random message to be sent is: %s\n", buffer);
-    int bytes_sent = sendto(socket_fd, buffer, BUF_LEN, 0, (struct sockaddr*)&server_address, sizeof(server_address));
-    printf("Message sent.\n");
-    if (bytes_sent < 0) {
-        printf("Message could not be sent: %s", strerror(errno));
-        return 0;
-    }  else if (!bytes_sent) {
-        printf("No content has been sent to the server.\n");
-        return 0;
-    }
+        printf("The random message to be sent is: %s\n", buffer);
 
-    int address_length = sizeof(server_address);
-    printf("What's going on...\n");
-    bytes_sent = recvfrom(socket_fd, server_response, BUF_LEN, 0, (struct sockaddr*)&server_address, &address_length);
-    printf("Helloooooo\n");
-    if (bytes_sent < 0) {
-        printf("Error in receiving message: %s", strerror(errno));
-        return 0;
-    }
+        clock_t start_time = clock();
+        int bytes_sent = sendto(socket_fd, buffer, BUF_LEN, 0, (struct sockaddr*)&server_address, sizeof(server_address));
 
-    printf("Received a response from the server: %s\n", server_response);
+        if (bytes_sent < 0) {
+            printf("Message could not be sent: %s", strerror(errno));
+            continue;
+        }  else if (!bytes_sent) {
+            printf("No content has been sent to the server.\n");
+            continue;
+        }
 
-    if (!strcmp(buffer, server_response)) {
-        printf("The server's echo response is identical.\n");
-    } else {
-        printf("The server's echo response is different.\n");
+        int address_length = sizeof(server_address);
+        bytes_sent = recvfrom(socket_fd, server_response, BUF_LEN, 0, (struct sockaddr*)&server_address, &address_length);
+
+        if (bytes_sent < 0) {
+            printf("Error in receiving message: %s", strerror(errno));
+            continue;
+        }
+
+        clock_t end_time = clock();
+        printf("Received a response from the server: %s\n", server_response);
+
+        if (!strcmp(buffer, server_response)) {
+            printf("The server's echo response is identical.\n");
+        } else {
+            printf("The server's echo response is different.\n");
+        }
+
+        double time_spent = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+        printf("Time taken: %f seconds\n\n", time_spent);
     }
 
     return 0;
