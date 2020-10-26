@@ -33,7 +33,6 @@ int main() {
 
     printf("...\n");    
 
-    bool finished = false;
     int lower_bound = 1, upper_bound = (int)1e6 -1;
     srand(time(NULL));
     char answer;
@@ -43,18 +42,23 @@ int main() {
 
     int random_number = (rand() % (upper_bound - lower_bound + 1)) + lower_bound; 
     printf("The random number is %d\n", random_number);
-    int client_number, client_id;
+    int client_number;
 
-    while (!finished) {
+    while (true) {
         struct sockaddr_in client_address;
         int address_length = sizeof(client_address);
         int bytes_received = recvfrom(socket_fd, &client_number, sizeof(client_number), 0, (struct sockaddr*)&client_address, &address_length);
+
+        if (bytes_received < 0) {
+            printf("Recvfrom failed: %s\n", strerror(errno));
+            continue;
+        }
+
         client_number = ntohl(client_number);
         bool already_in_list = false;
         for (int i = 0; i < number_of_clients; i++) {
             if (clients[i].sin_addr.s_addr == client_address.sin_addr.s_addr) {
                 already_in_list = false;
-                client_id = i;
                 break;
             }
         }
@@ -64,42 +68,24 @@ int main() {
             clients[number_of_clients] = client_address;
         }
 
-
-        if (bytes_received < 0) {
-            printf("Recvfrom failed: %s\n", strerror(errno));
-            continue;
-        }
-
         if (client_number == random_number) {
             answer = 'G';
-            if (sendto(socket_fd, &answer, sizeof(answer), 0, (struct sockaddr*)&client_address, sizeof(client_address)) < 0) {
+            if (sendto(socket_fd, &answer, sizeof(answer), 0, (struct sockaddr*)&client_address, sizeof(client_address)) < 0)
                 printf("Sendto failed: %s\n", strerror(errno));
-                continue;
-            }
 
             answer = 'L';
-            for (int i = 0; i < number_of_clients; i++) {
+            for (int i = 0; i < number_of_clients; i++)
                 sendto(socket_fd, &answer, sizeof(answer), 0, (struct sockaddr*)&clients[i], sizeof(clients[i]));
-            }
 
-            finished = true;
+            break;
         }
 
-        if (client_number > random_number) {
+        if (client_number > random_number)
             answer = 'S';
-            if (sendto(socket_fd, &answer, sizeof(answer), 0, (struct sockaddr*)&client_address, sizeof(client_address)) < 0) {
-                printf("Sendto failed: %s\n", strerror(errno));
-                continue;
-            }
-        } 
-
-        if (client_number < random_number) {
+        if (client_number < random_number)
             answer = 'H';
-            if (sendto(socket_fd, &answer, sizeof(answer), 0, (struct sockaddr*)&client_address, sizeof(client_address)) < 0) {
-                printf("Sendto failed: %s\n", strerror(errno));
-                continue;
-            }
-        } 
+        if (sendto(socket_fd, &answer, sizeof(answer), 0, (struct sockaddr*)&client_address, sizeof(client_address)) < 0)
+            printf("Sendto failed: %s\n", strerror(errno));
     }
 
     close(socket_fd);
