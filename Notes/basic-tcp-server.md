@@ -1,4 +1,4 @@
-# Creating a basic server
+# Creating a basic TCP server
 - create a socket
 - check if the socket creation was successful
 - set members of sockaddr_in to store the address and port

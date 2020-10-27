@@ -1,5 +1,5 @@
 # Number guess problem
-A client server implementation in python for the number guess problem from lab 2, but this time with UDP sockets. 
+A client server implementation in C for the number guess problem from lab 2, but this time with UDP sockets. 
 
 > The server chooses a random number. 
 
