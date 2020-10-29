@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <poll.h>
 #define MSG_LEN 1024
 #define SHORT_MSG 256
 
@@ -78,9 +79,11 @@ void get_date(char thedate[]) {
 void* timequery_broadcaster(void* argument) {
     char query[] = "TIMEQUERY\0";
     char response[SHORT_MSG];
+    struct pollfd file_descriptors[1];
+    file_descriptors[0].fd = client_socket_fd_time;
+    file_descriptors[0].events = POLLIN;
 
     while (true) {
-        sleep(3);
         int bytes_sent = sendto(client_socket_fd_time, query, strlen(query), 0, (struct sockaddr*)&broadcast_address, sizeof(broadcast_address));
         if (bytes_sent < 0) {
             printf("Error sending message: %s\n", strerror(errno));
@@ -89,13 +92,23 @@ void* timequery_broadcaster(void* argument) {
         printf("Timequery thread sent a request.\n");
         
         int address_size = sizeof(broadcast_address);
-        printf("Timequery thread recvfrom called.\n");
-        int bytes_received = recvfrom(client_socket_fd_time, response, SHORT_MSG, 0, (struct sockaddr*)&broadcast_address, &address_size);
-        printf("Timequery thread recvfrom finished.\n");
-        if (bytes_received < 0) {
-            printf("Error sending message: %s\n", strerror(errno));
+        int events = poll(file_descriptors, 1, 3000);  /// waits 3 seconds
+        if (events > 0) {
+            int pollin_happened = file_descriptors[0].revents & POLLIN;
+
+            if (pollin_happened) {
+                printf("File descriptor %d is ready to read\n", file_descriptors[0].fd);
+                printf("Timequery thread recvfrom called.\n");
+                int bytes_received = recvfrom(client_socket_fd_time, response, SHORT_MSG, 0, (struct sockaddr*)&broadcast_address, &address_size);
+                printf("Timequery thread recvfrom finished.\n");
+                if (bytes_received < 0) {
+                    printf("Error sending message: %s\n", strerror(errno));
+                }
+                printf("Timequery thread received a response: %s\n", response);
+            } else {
+                printf("Unexpected event occurred: %d\n", file_descriptors[0].revents);
+            }
         }
-        printf("Timequery thread received a response: %s\n", response);
     }
 }
 
@@ -103,9 +116,11 @@ void* timequery_broadcaster(void* argument) {
 void* datequery_broadcaster(void* argument) {
     char query[] = "DATEQUERY\0";
     char response[SHORT_MSG];
+    struct pollfd file_descriptors[1];
+    file_descriptors[0].fd = client_socket_fd_date;
+    file_descriptors[0].events = POLLIN;
 
     while (true) {
-        sleep(10);
         int bytes_sent = sendto(client_socket_fd_date, query, strlen(query), 0, (struct sockaddr*)&broadcast_address, sizeof(broadcast_address));
         if (bytes_sent < 0) {
             printf("Error sending message: %s\n", strerror(errno));
@@ -113,13 +128,24 @@ void* datequery_broadcaster(void* argument) {
         printf("Datequery thread sent a request.\n");
 
         int address_size = sizeof(broadcast_address);
-        printf("Datequery thread recvfrom called.\n");
-        int bytes_received = recvfrom(client_socket_fd_date, response, SHORT_MSG, 0, (struct sockaddr*)&broadcast_address, &address_size);
-        printf("Datequery thread recvfrom finished.\n");
-        if (bytes_received < 0) {
-            printf("Error sending message: %s\n", strerror(errno));
+        int events = poll(file_descriptors, 1, 10000);  /// waits 10 seconds
+
+        if (events > 0) {            
+            int pollin_happened = file_descriptors[0].revents & POLLIN;
+
+            if (pollin_happened) {
+                printf("File descriptor %d is ready to read\n", file_descriptors[0].fd);
+                printf("Datequery thread recvfrom called.\n");
+                int bytes_received = recvfrom(client_socket_fd_date, response, SHORT_MSG, 0, (struct sockaddr*)&broadcast_address, &address_size);
+                printf("Datequery thread recvfrom finished.\n");
+                if (bytes_received < 0) {
+                    printf("Error sending message: %s\n", strerror(errno));
+                }
+                printf("Datequery thread received a response: %s\n", response);
+            } else {
+                printf("Unexpected event occurred: %d\n", file_descriptors[0].revents);
+            }
         }
-        printf("Datequery thread received a response: %s\n", response);
     }
 }
 
@@ -176,6 +202,8 @@ int main(int argc, char* argv[]) {
         }        
 
         printf("Main thread received a request from %s: %s\n", inet_ntoa(client_address.sin_addr), message);
+        char client_address_as_string[SHORT_MSG];
+        strcpy(client_address_as_string, inet_ntoa(client_address.sin_addr));
 
         if (!strcmp(inet_ntoa(client_address.sin_addr), local_ip_address)) {
             // Do not respond to requests from the same machine.
