@@ -7,17 +7,35 @@
 #include <time.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <netinet/ip.h>
 #include <netinet/in.h>
+#include <net/if.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <pthread.h>
 #define MSG_LEN 1024
 #define SHORT_MSG 256
 
+
 struct sockaddr_in broadcast_address;
 int server_socket_fd, client_socket_fd_time, client_socket_fd_date; 
 pthread_t timequery_thread, datequery_thread; 
+char local_ip_address[SHORT_MSG];
+
+void get_local_ip(char address[]) {
+    int fd;
+    struct ifreq ifr;
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    ifr.ifr_addr.sa_family = AF_INET;
+
+    strncpy(ifr.ifr_name, "wlo1", IFNAMSIZ-1);
+    ioctl(fd, SIOCGIFADDR, &ifr);
+    close(fd);
+
+    sprintf(address, "%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+}
+
 
 void get_time(char thetime[]) {
 	time_t rawtime;
@@ -58,7 +76,7 @@ void get_date(char thedate[]) {
 
 
 void* timequery_broadcaster(void* argument) {
-    char query[] = "TIMEQUERY";
+    char query[] = "TIMEQUERY\0";
     char response[SHORT_MSG];
 
     while (true) {
@@ -83,7 +101,7 @@ void* timequery_broadcaster(void* argument) {
 
 
 void* datequery_broadcaster(void* argument) {
-    char query[] = "DATEQUERY";
+    char query[] = "DATEQUERY\0";
     char response[SHORT_MSG];
 
     while (true) {
@@ -111,6 +129,8 @@ int main(int argc, char* argv[]) {
         printf("Usage: %s [network broadcast address]\n", argv[0]);
         return 0;
     }
+
+    get_local_ip(local_ip_address);
 
     broadcast_address.sin_family = AF_INET;
     broadcast_address.sin_port = htons(7777);
@@ -156,6 +176,12 @@ int main(int argc, char* argv[]) {
         }        
 
         printf("Main thread received a request from %s: %s\n", inet_ntoa(client_address.sin_addr), message);
+
+        if (!strcmp(inet_ntoa(client_address.sin_addr), local_ip_address)) {
+            // Do not respond to requests from the same machine.
+            printf("Request from the same machine ignored.\n");
+            continue;
+        }
 
         if (!strncmp(message, "TIMEQUERY", 9)) {
             char thetime[SHORT_MSG];
