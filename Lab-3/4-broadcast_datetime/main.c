@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <poll.h>
+#include <signal.h>
 #define MSG_LEN 1024
 #define SHORT_MSG 256
 
@@ -156,6 +157,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+    signal(SIGCHLD, SIG_IGN);
     get_local_ip(local_ip_address);
 
     broadcast_address.sin_family = AF_INET;
@@ -211,28 +213,30 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
-        if (!strncmp(message, "TIMEQUERY", 9)) {
-            char thetime[SHORT_MSG];
-            get_time(thetime);
-            int bytes_sent = sendto(server_socket_fd, thetime, SHORT_MSG, 0, (struct sockaddr*)&client_address, sizeof(client_address));
-            if (bytes_sent < 0) {                    
-                printf("Error sending message: %s\n", strerror(errno));
-                continue;
+        if (fork() == 0) {
+            if (!strncmp(message, "TIMEQUERY", 9)) {
+                char thetime[SHORT_MSG];
+                get_time(thetime);
+                int bytes_sent = sendto(server_socket_fd, thetime, SHORT_MSG, 0, (struct sockaddr*)&client_address, sizeof(client_address));
+                if (bytes_sent < 0) {                    
+                    printf("Error sending message: %s\n", strerror(errno));
+                    continue;
+                }
+                printf("Sent TIMEQUERY response.\n");
             }
-            printf("Sent TIMEQUERY response.\n");
-        }
 
-        if (!strncmp(message, "DATEQUERY", 9)) {
-            char thedate[SHORT_MSG];
-            get_date(thedate);
-            int bytes_sent = sendto(server_socket_fd, thedate, SHORT_MSG, 0, (struct sockaddr*)&client_address, sizeof(client_address));
-            if (bytes_sent < 0) {                    
-                printf("Error sending message: %s\n", strerror(errno));
-                continue;
+            if (!strncmp(message, "DATEQUERY", 9)) {
+                char thedate[SHORT_MSG];
+                get_date(thedate);
+                int bytes_sent = sendto(server_socket_fd, thedate, SHORT_MSG, 0, (struct sockaddr*)&client_address, sizeof(client_address));
+                if (bytes_sent < 0) {                    
+                    printf("Error sending message: %s\n", strerror(errno));
+                    continue;
+                }
+                printf("Sent DATEQUERY response.\n");
             }
-            printf("Sent DATEQUERY response.\n");
         }
-    }
+   }
 
     pthread_join(timequery_thread, NULL);
     pthread_join(datequery_thread, NULL);
