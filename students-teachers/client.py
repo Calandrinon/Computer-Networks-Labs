@@ -1,5 +1,5 @@
 import socket, sys, time, random
-import threading 
+import threading, subprocess 
 
 """
 Students
@@ -15,6 +15,11 @@ The teacher is the “server”; using select and TCP communication it waits for
 When a question is received, the sever generates the response (a string and an array of integers – the string and the values in this array should be randomly generated) and sends back the response to the group leader. 
 Create at least 3 groups with minimum 5 students each.
 """
+
+def get_local_ip_address():
+    # This makes use of the ip addr command to obtain the local ip
+    local_ip = subprocess.check_output("ip addr | grep 192.168 | awk '{print $2}' | sed 's/\(.*\)\\/24/\\1/g'", shell=True, universal_newlines=True).strip()
+    return local_ip 
 
 
 group_port = int(input("Enter the group port: "))
@@ -61,6 +66,9 @@ def leader():
     def classmates_listener_thread():
         while True:
             (data, address) = listener_classmates.recvfrom(1024)
+            if address[0] == "127.0.0.1" or address[0] == get_local_ip_address():
+                continue
+
             print("Received question from a classmate: {} {}".format(data.decode(), address))
             socket_fd_teacher.send(data)
             answer_from_teacher = socket_fd_teacher.recv(1024).decode()
@@ -148,7 +156,9 @@ def regular_student():
 
 
 
-if is_leader:
+if is_leader == 1:
+    print("The leader")
     leader()
 else:
+    print("The regular student")
     regular_student()
