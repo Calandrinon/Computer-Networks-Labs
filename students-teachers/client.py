@@ -93,9 +93,9 @@ def regular_student():
 
     try:
         listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        listener.bind(('', group_port))
         listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        listener.bind(('', group_port))
     except Exception as e:
         print("Listener creation failed: ", e)
 
