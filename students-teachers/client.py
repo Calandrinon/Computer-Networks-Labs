@@ -112,7 +112,6 @@ def regular_student():
             time.sleep(3)
             print("Question thread sleep over.")
             random_float = random.random()
-
             if random_float >= 0.5:
                 message = compose_random_string()
 
@@ -121,6 +120,7 @@ def regular_student():
                 mutex.release()
 
                 socket_fd.sendto(message.encode(), (group_leader_address_copy, group_port))
+                print("Sent a question to the group leader: {}".format(message))
 
 
     no_leader_address = True
