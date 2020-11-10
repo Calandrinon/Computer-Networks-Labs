@@ -37,7 +37,7 @@ def leader():
     try:
         listener_classmates = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         listener_classmates.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-        listener_classmates.bind(('', 9999))
+        listener_classmates.bind(('', group_port))
     except Exception as e:
         print("Classmates-listener socket creation failed: ", e)
 
