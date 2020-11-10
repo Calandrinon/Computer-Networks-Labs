@@ -62,7 +62,7 @@ def leader():
         while True:
             (data, address) = listener_classmates.recvfrom(1024)
             print("Received question from a classmate: {} {}".format(data.decode(), address))
-            socket_fd_teacher.send(data.encode())
+            socket_fd_teacher.send(data)
             string_answer_from_teacher = socket_fd_teacher.recv(1024).decode()
             array_answer_from_teacher = socket_fd_teacher.recv(1024).decode()
             array_answer_from_teacher = pickle.loads(array_answer_from_teacher)
