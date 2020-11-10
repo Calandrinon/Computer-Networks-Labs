@@ -61,7 +61,7 @@ def leader():
     def classmates_listener_thread():
         while True:
             (data, address) = listener_classmates.recvfrom(1024)
-            print("Received question from a classmate: {}".format(data.decode(), address))
+            print("Received question from a classmate: {} {}".format(data.decode(), address))
             socket_fd_teacher.send(data.encode())
             string_answer_from_teacher = socket_fd_teacher.recv(1024).decode()
             array_answer_from_teacher = socket_fd_teacher.recv(1024).decode()
@@ -118,7 +118,7 @@ def regular_student():
                 mutex.release()
 
                 socket_fd.sendto(message.encode(), (group_leader_address_copy, group_port))
-                print("Sent a question to the group leader: {}".format(message))
+                print("Sent a question to the group leader: {} {}".format(message, (group_leader_address_copy, group_port)))
 
 
     no_leader_address = True
