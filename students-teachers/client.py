@@ -36,6 +36,7 @@ def leader():
 
     try:
         listener_classmates = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        listener_classmates.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         listener_classmates.bind(('', 9999))
     except Exception as e:
         print("Classmates-listener socket creation failed: ", e)
@@ -59,7 +60,9 @@ def leader():
 
     def classmates_listener_thread():
         while True:
-            (data, _) = listener_classmates.recvfrom(1024)
+            (data, address) = listener_classmates.recvfrom(1024)
+            if address[0] == "127.0.0.1":
+                continue
             print("Received question from a classmate: {}".format(data.decode()))
             socket_fd_teacher.send(data.encode())
             string_answer_from_teacher = socket_fd_teacher.recv(1024).decode()

@@ -32,8 +32,6 @@ def compose_random_answer():
 
 
 master = read_fds = [listener]
-client_addresses = {}
-
 print("Listening...")
 
 while True:
@@ -43,10 +41,8 @@ while True:
     for fd in ready_sockets:
         if fd == listener:
             (client_connection, client_address) = listener.accept() 
-            client_addresses[fd] = client_address
             master.append(client_connection)
-
-            print("selectserver: new question from a group leader ({})\n".format(client_address))
+            print("Connected with a group leader ({})\n".format(client_address))
         else:
             # handle messages from clients(student group leaders)
             try:
