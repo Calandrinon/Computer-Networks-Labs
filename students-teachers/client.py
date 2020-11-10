@@ -129,6 +129,9 @@ def regular_student():
     print("Question sender listener started...")
     while True:
         (data, address) = listener.recvfrom(1024)
+        if address[0] == "127.0.0.1":
+            print("Received message from myself: {}".format(data.decode()))
+            continue
         print("Received forwarded answer from the group leader: {} {}".format(data.decode(), address))
 
         mutex.acquire()
