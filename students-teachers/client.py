@@ -61,9 +61,7 @@ def leader():
     def classmates_listener_thread():
         while True:
             (data, address) = listener_classmates.recvfrom(1024)
-            if address[0] == "127.0.0.1":
-                continue
-            print("Received question from a classmate: {}".format(data.decode()))
+            print("Received question from a classmate: {}".format(data.decode(), address))
             socket_fd_teacher.send(data.encode())
             string_answer_from_teacher = socket_fd_teacher.recv(1024).decode()
             array_answer_from_teacher = socket_fd_teacher.recv(1024).decode()
@@ -131,7 +129,7 @@ def regular_student():
     print("Question sender listener started...")
     while True:
         (data, address) = listener.recvfrom(1024)
-        print("Received forwarded answer from the group leader: {}".format(data.decode()))
+        print("Received forwarded answer from the group leader: {} {}".format(data.decode(), address))
 
         mutex.acquire()
         group_leader_address_copy = group_leader_address
