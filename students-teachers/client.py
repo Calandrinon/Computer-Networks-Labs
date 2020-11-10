@@ -1,5 +1,5 @@
 import socket, sys, time, random
-import threading, pickle
+import threading 
 
 """
 Students
@@ -63,10 +63,8 @@ def leader():
             (data, address) = listener_classmates.recvfrom(1024)
             print("Received question from a classmate: {} {}".format(data.decode(), address))
             socket_fd_teacher.send(data)
-            string_answer_from_teacher = socket_fd_teacher.recv(1024).decode()
-            array_answer_from_teacher = socket_fd_teacher.recv(1024).decode()
-            array_answer_from_teacher = pickle.loads(array_answer_from_teacher)
-            broadcast_answer_for_classmates = "Original question: " + data.decode() + "; String answer: " + string_answer_from_teacher + "; Array answer: " + str(array_answer_from_teacher) 
+            answer_from_teacher = socket_fd_teacher.recv(1024).decode()
+            broadcast_answer_for_classmates = "Original question: " + data.decode() + "; Teacher's answer: " + answer_from_teacher
             socket_fd_classmates.sendto(broadcast_answer_for_classmates.encode(), ('255.255.255.255', group_port))
             print("Sent answer from teacher to classmates: {}".format(broadcast_answer_for_classmates))
 

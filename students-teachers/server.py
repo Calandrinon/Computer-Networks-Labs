@@ -1,6 +1,5 @@
 import socket, sys, time, random
 import threading, select
-import pickle
 
 try:
     socket_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -49,9 +48,10 @@ while True:
                 question = fd.recv(1024).decode() 
                 print("Received question from group leader: {}".format(question))
                 (string_answer, array_answer) = compose_random_answer()
-                fd.send(string_answer.encode())
-                fd.send(pickle.dumps(array_answer))
-                print("Sent answer ({}, {}) to group leader.".format(string_answer, str(array_answer)))
+                array_answer = str(array_answer)
+                final_answer = "String answer: {}; Array: {};".format(string_answer, array_answer) 
+                fd.send(final_answer.encode())
+                print("Sent answer {} to group leader.".format(final_answer))
             except Exception as e:
                 print("ERROR: {}".format(e))
                 fd.close()
